@@ -616,7 +616,15 @@
   </div>
 </div>
 
+<script src="spirits-data.js"></script>
 <script>
+// ============================================================
+// 配置区
+// ============================================================
+// Cloudflare Worker URL（图片代理，解决CORS和反盗链）
+// 部署Worker后，取消下一行注释并替换为实际URL
+const IMG_WORKER = 'https://luoke-img.dlzydyx.workers.dev';
+
 // ============================================================
 // 精灵数据库
 // 数据参考：游侠网 & 洛克王国BWIKI社区整理（CC BY-SA 4.0）
@@ -627,7 +635,7 @@
 // 精灵数据（含编号、属性、蛋区）
 // 数据参考：洛克王国BWIKI & 游侠网（CC BY-SA 4.0）
 // ============================================================
-const SPIRITS = [
+const _SPIRITS_OLD = [
   // 超轻蛋（< 1kg）
   { id:'054', name:'小灵面',  attr:['幽'],       sMin:0.15, sMax:0.22, wMin:0.034,wMax:0.056, zone:0 },
   { id:'069', name:'蒲公英',  attr:['草'],       sMin:0.12, sMax:0.19, wMin:0.045,wMax:0.090, zone:0 },
@@ -776,8 +784,17 @@ const _imgCache = {}; // { name: url | 'none' }
 
 function getSpiritImgHTML(spirit) {
   const name = spirit.name;
+
+  // 如果配置了 Worker，直接使用 Worker URL（同步返回 img 标签，无需异步加载）
+  if (IMG_WORKER) {
+    const imgUrl = `${IMG_WORKER}/?name=${encodeURIComponent(name)}`;
+    return `<img src="${imgUrl}" alt="${name}" loading="lazy"
+                style="max-width:100%;max-height:100%;object-fit:contain;padding:5px;"
+                onerror="this.outerHTML='<div class=\\'sc-img-placeholder\\' title=\\'${name}\\'>🐾</div>'">`;
+  }
+
+  // 回退方案：异步加载（原有逻辑，不依赖 Worker）
   const id = 'si-' + name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_');
-  // 返回占位符，异步加载真实图片
   setTimeout(() => _loadSpiritImg(name, id), 0);
   return `<div id="${id}" class="sc-img-placeholder" title="${name}">⋯</div>`;
 }

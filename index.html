@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>洛克王国：世界 · 孵蛋结果预测器</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+
+  :root {
+    --yellow-main: #FFD700;
+    --yellow-light: #FFF3B0;
+    --yellow-dark: #E6A800;
+    --orange-accent: #FF8C00;
+    --dark: #3D2B00;
+    --card-bg: rgba(255,255,255,0.93);
+    --shadow: 0 4px 20px rgba(0,0,0,0.15);
+    --border-r: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+    background: linear-gradient(160deg,#FFD740 0%,#FFC107 40%,#FFB300 100%);
+    min-height: 100vh;
+    padding-bottom: 50px;
+    color: var(--dark);
+    position: relative;
+    overflow-x: hidden;
+  }
+  .bg-deco { position:fixed;font-size:120px;color:rgba(255,255,255,0.07);pointer-events:none;user-select:none;font-weight:900;z-index:0; }
+
+  /* 顶栏 */
+  .top-bar {
+    background: rgba(220,158,0,0.97);
+    backdrop-filter: blur(8px);
+    padding: 13px 20px;
+    text-align: center;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  }
+  .top-bar h1 { font-size:18px;font-weight:900;color:var(--dark);letter-spacing:1px; }
+  .top-bar .subtitle { font-size:10px;color:rgba(61,43,0,0.6);margin-top:1px; }
+
+  .container { max-width:480px;margin:0 auto;padding:0 14px;position:relative;z-index:1; }
+
+  /* 主标题 */
+  .hero { text-align:center;padding:22px 12px 14px; }
+  .hero h2 { font-size:26px;font-weight:900;color:var(--dark);letter-spacing:2px;text-shadow:0 2px 8px rgba(255,255,255,0.35); }
+  .egg-wrap { margin:10px auto 0;width:100px;height:100px;display:flex;align-items:center;justify-content:center; }
+  .egg-svg { width:92px;height:92px;filter:drop-shadow(0 6px 14px rgba(0,0,0,0.2));animation:floatEgg 3s ease-in-out infinite; }
+  @keyframes floatEgg { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .egg-svg.busy { animation:floatEgg .45s ease-in-out infinite,glowEgg .7s ease-in-out infinite; }
+  @keyframes glowEgg { 0%,100%{filter:drop-shadow(0 6px 14px rgba(0,0,0,0.2))} 50%{filter:drop-shadow(0 6px 24px rgba(255,200,0,0.7))} }
+
+  /* 卡片 */
+  .card { background:var(--card-bg);border-radius:var(--border-r);padding:18px;margin-bottom:14px;box-shadow:var(--shadow); }
+  .card-title { font-size:13px;font-weight:700;color:var(--dark);margin-bottom:12px;display:flex;align-items:center;gap:6px; }
+  .card-title .dot { width:7px;height:7px;background:var(--yellow-dark);border-radius:50%; }
+
+  /* 输入 */
+  .input-row { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px; }
+  .input-group label { display:block;font-size:11px;color:#888;margin-bottom:5px;font-weight:500; }
+  .input-wrap { display:flex;align-items:center;background:#F8F4E8;border:2px solid #E8DFC0;border-radius:11px;transition:border-color .2s;overflow:hidden; }
+  .input-wrap:focus-within { border-color:var(--yellow-dark);background:#FFFBE8; }
+  .input-wrap .ico { padding:0 8px 0 11px;font-size:17px;color:var(--orange-accent); }
+  .input-wrap input { flex:1;border:none;background:transparent;padding:10px 0;font-size:16px;font-weight:700;color:var(--dark);outline:none;min-width:0; }
+  .input-wrap input::placeholder { color:#CCC;font-weight:400; }
+  .input-wrap .unit { padding:0 10px 0 3px;font-size:11px;color:#AAA;font-weight:600; }
+
+  /* 按钮 */
+  .btn-primary { width:100%;padding:13px;background:linear-gradient(135deg,#FFD740,#FFA000);border:none;border-radius:11px;font-size:17px;font-weight:900;color:var(--dark);cursor:pointer;letter-spacing:2px;box-shadow:0 4px 14px rgba(255,160,0,0.38);transition:transform .14s,box-shadow .14s;position:relative;overflow:hidden; }
+  .btn-primary:active { transform:scale(.97); }
+  .btn-primary:hover { transform:translateY(-1px);box-shadow:0 6px 18px rgba(255,160,0,0.48); }
+  .btn-ripple { position:absolute;border-radius:50%;background:rgba(255,255,255,0.28);transform:scale(0);animation:ripple .6s linear;pointer-events:none; }
+  @keyframes ripple { to{transform:scale(4);opacity:0} }
+
+  /* 切换开关 */
+  .toggle-row { display:flex;align-items:center;gap:9px;margin-top:11px;cursor:pointer;user-select:none; }
+  .toggle-wrap { position:relative;width:38px;height:21px;flex-shrink:0; }
+  .toggle-wrap input { display:none; }
+  .tslider { position:absolute;inset:0;background:#DDD;border-radius:11px;transition:background .3s;cursor:pointer; }
+  .tslider::before { content:'';position:absolute;left:3px;top:3px;width:15px;height:15px;background:white;border-radius:50%;transition:transform .3s;box-shadow:0 1px 4px rgba(0,0,0,0.18); }
+  .toggle-wrap input:checked + .tslider { background:var(--yellow-dark); }
+  .toggle-wrap input:checked + .tslider::before { transform:translateX(17px); }
+  .toggle-label { font-size:12px;color:#666; }
+
+  /* 示例 */
+  .examples-row { display:flex;gap:7px;flex-wrap:wrap;margin-top:11px; }
+  .ex-chip { background:rgba(255,215,0,0.28);border:1.5px solid rgba(230,168,0,0.38);border-radius:18px;padding:5px 11px;font-size:11px;color:var(--dark);cursor:pointer;transition:background .2s;font-weight:600; }
+  .ex-chip:hover { background:rgba(255,215,0,0.55); }
+  .sec-label { font-size:11px;color:rgba(61,43,0,0.5);margin-bottom:5px;font-weight:600; }
+
+  /* 统计栏 */
+  .stats-card { background:var(--card-bg);border-radius:var(--border-r);padding:14px 18px;margin-bottom:14px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr 1fr 1fr;gap:0; }
+  .stat-item { text-align:center;padding:3px 0; }
+  .stat-item+.stat-item { border-left:1px solid #EEE; }
+  .stat-label { font-size:10px;color:#999;margin-bottom:3px; }
+  .stat-value { font-size:20px;font-weight:900;color:#E53935;letter-spacing:-1px; }
+  .stat-value.sm { font-size:13px;color:var(--dark); }
+  .stat-sub { font-size:10px;color:#999;margin-top:1px; }
+  .gauge-wrap { display:flex;flex-direction:column;align-items:center; }
+  .gauge-svg { width:52px;height:30px; }
+  .gauge-val { font-size:12px;font-weight:900;color:var(--orange-accent);margin-top:-2px; }
+
+  /* 视图切换 */
+  .view-toggle-row { display:flex;align-items:center;justify-content:space-between;margin-bottom:10px; }
+  .results-header { font-size:14px;font-weight:700;color:var(--dark);display:flex;align-items:center;gap:7px; }
+  .results-header .badge { background:var(--yellow-dark);color:white;border-radius:18px;padding:2px 9px;font-size:11px;font-weight:700; }
+  .view-btns { display:flex;gap:5px; }
+  .vbtn { padding:5px 12px;border:2px solid rgba(230,168,0,0.4);border-radius:20px;background:transparent;font-size:12px;font-weight:700;color:#888;cursor:pointer;transition:all .2s; }
+  .vbtn.active { background:var(--yellow-dark);border-color:var(--yellow-dark);color:white; }
+
+  /* ===== 卡片视图 ===== */
+  .card-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:9px; }
+  .spirit-card {
+    background:var(--card-bg);border-radius:14px;overflow:hidden;
+    box-shadow:0 2px 10px rgba(0,0,0,0.09);
+    animation:fadeUp .3s ease both;
+    cursor:default;
+    transition:transform .15s,box-shadow .15s;
+    position:relative;
+  }
+  .spirit-card:hover { transform:translateY(-2px);box-shadow:0 5px 18px rgba(0,0,0,0.14); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  .sc-img-wrap {
+    width:100%;padding-top:85%;
+    position:relative;
+    background:linear-gradient(135deg,#FFF8DC,#FFF0B3);
+    overflow:hidden;
+  }
+  .sc-img-wrap img {
+    position:absolute;inset:0;width:100%;height:100%;
+    object-fit:contain;padding:6px;
+    transition:transform .3s;
+  }
+  .spirit-card:hover .sc-img-wrap img { transform:scale(1.07); }
+  .sc-img-placeholder {
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:30px;color:rgba(180,140,0,0.3);font-weight:900;
+  }
+
+  .sc-pct {
+    position:absolute;top:5px;right:5px;
+    background:rgba(230,80,0,0.88);color:white;
+    border-radius:10px;padding:2px 7px;font-size:10px;font-weight:900;
+    backdrop-filter:blur(4px);
+  }
+  .sc-num {
+    position:absolute;top:5px;left:5px;
+    background:rgba(0,0,0,0.38);color:white;
+    border-radius:8px;padding:1px 6px;font-size:9px;font-weight:700;
+  }
+  .sc-rank-badge {
+    position:absolute;bottom:5px;left:5px;
+    width:18px;height:18px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:900;
+  }
+  .sc-rank-badge.r1{background:#FFD700;color:#5D4A00;}
+  .sc-rank-badge.r2{background:#D8D8D8;color:#555;}
+  .sc-rank-badge.r3{background:#CD7F32;color:#fff;}
+  .sc-rank-badge.rn{background:rgba(0,0,0,0.2);color:#fff;}
+
+  .sc-body { padding:7px 8px 8px; }
+  .sc-name { font-size:12px;font-weight:900;color:var(--dark);text-align:center;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+  .sc-attrs { display:flex;gap:3px;justify-content:center;flex-wrap:wrap; }
+  .attr-tag { padding:1px 6px;border-radius:6px;font-size:9px;font-weight:700; }
+
+  /* 属性色 */
+  .a-普通{background:#ECEFF1;color:#546E7A;}
+  .a-草{background:#E8F5E9;color:#2E7D32;}
+  .a-火{background:#FBE9E7;color:#BF360C;}
+  .a-水{background:#E3F2FD;color:#1565C0;}
+  .a-光{background:#FFFDE7;color:#F57F17;}
+  .a-地{background:#FBE9E7;color:#795548;}
+  .a-冰{background:#E1F5FE;color:#0277BD;}
+  .a-龙{background:#EDE7F6;color:#4527A0;}
+  .a-电{background:#FFFDE7;color:#F9A825;}
+  .a-毒{background:#F3E5F5;color:#6A1B9A;}
+  .a-虫{background:#F1F8E9;color:#558B2F;}
+  .a-武{background:#FFEBEE;color:#B71C1C;}
+  .a-翼{background:#E8EAF6;color:#283593;}
+  .a-萌{background:#FCE4EC;color:#880E4F;}
+  .a-幽{background:#311B92;color:#EDE7F6;}
+  .a-恶{background:#212121;color:#BDBDBD;}
+  .a-机械{background:#ECEFF1;color:#37474F;}
+  .a-幻{background:#F9FBE7;color:#827717;}
+
+  /* ===== 属性 SVG 图标 ===== */
+  .ab {
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%; font-size: 8px; font-weight: 900; font-family: sans-serif;
+    width: 20px; height: 20px; flex-shrink: 0; letter-spacing: 0;
+  }
+  /* 小尺寸（列表用） */
+  .ab-sm {
+    width: 16px; height: 16px; font-size: 6px;
+  }
+  .ab-普通{background:#CFD8DC;color:#37474F;}
+  .ab-草{background:#81C784;color:#1B5E20;}
+  .ab-火{background:#EF9A9A;color:#B71C1C;}
+  .ab-水{background:#90CAF9;color:#0D47A1;}
+  .ab-光{background:#FFE082;color:#E65100;}
+  .ab-地{background:#BCAAA4;color:#3E2723;}
+  .ab-冰{background:#B3E5FC;color:#01579B;}
+  .ab-龙{background:#CE93D8;color:#4A148C;}
+  .ab-电{background:#FFF59D;color:#F57F17;}
+  .ab-毒{background:#BA68C8;color:#4A0072;}
+  .ab-虫{background:#AED581;color:#33691E;}
+  .ab-武{background:#EF5350;color:#7F0000;}
+  .ab-翼{background:#7986CB;color:#1A237E;}
+  .ab-萌{background:#F48FB1;color:#880E4F;}
+  .ab-幽{background:#7E57C2;color:#EDE7F6;}
+  .ab-恶{background:#90A4AE;color:#263238;}
+  .ab-机械{background:#B0BEC5;color:#263238;}
+  .ab-幻{background:#D7CCC8;color:#5D4037;}
+
+  /* ===== 卡片视图（重新设计）===== */
+  .cg { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .scrd {
+    background:var(--card-bg); border-radius:14px; overflow:hidden;
+    box-shadow:0 2px 10px rgba(0,0,0,0.09);
+    animation:fadeUp .3s ease both; cursor:pointer;
+    transition:transform .15s,box-shadow .15s;
+    position:relative;
+  }
+  .scrd:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,0.15); }
+  .siw {
+    width:100%; padding-top:88%; position:relative;
+    background:linear-gradient(135deg,#FFF8DC,#FFF0B3); overflow:hidden;
+  }
+  .siw img {
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:contain; padding:5px;
+    transition:transform .3s;
+  }
+  .scrd:hover .siw img { transform:scale(1.06); }
+  .sc-img-placeholder {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:28px; color:rgba(180,140,0,0.28); font-weight:900;
+  }
+  .sp {
+    position:absolute; top:5px; right:5px;
+    background:rgba(230,80,0,0.88); color:white;
+    border-radius:10px; padding:2px 7px; font-size:10px; font-weight:900;
+    backdrop-filter:blur(4px); z-index:2;
+  }
+  .sn {
+    position:absolute; top:5px; left:5px;
+    background:rgba(0,0,0,0.38); color:white;
+    border-radius:8px; padding:1px 6px; font-size:9px; font-weight:700; z-index:2;
+  }
+  .srb {
+    position:absolute; bottom:5px; left:5px;
+    width:18px; height:18px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; font-weight:900; z-index:2;
+  }
+  .srb.r1{background:#FFD700;color:#5D4A00;}
+  .srb.r2{background:#D8D8D8;color:#555;}
+  .srb.r3{background:#CD7F32;color:#fff;}
+  .srb.rn{background:rgba(0,0,0,0.2);color:#fff;}
+  .sb {
+    position:absolute; bottom:5px; right:5px;
+    font-size:12px; z-index:2;
+  }
+  .sbo { padding:7px 8px 9px; }
+  .snm {
+    font-size:12px; font-weight:900; color:var(--dark);
+    text-align:center; margin-bottom:4px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .sat { display:flex; gap:3px; justify-content:center; flex-wrap:wrap; }
+  .sbw { margin-top:5px; height:5px; background:#EEE; border-radius:3px; overflow:hidden; }
+  .sbf { height:100%; border-radius:3px; transition:width .5s ease; }
+  .bf-e{background:linear-gradient(90deg,#4CAF50,#81C784);}
+  .bf-g{background:linear-gradient(90deg,#FF8F00,#FFB300);}
+  .bf-o{background:linear-gradient(90deg,#F44336,#EF9A9A);}
+  .bf-w{background:linear-gradient(90deg,#B71C1C,#EF9A9A);}
+
+  /* ===== 列表视图（重新设计）===== */
+  .lv { display:flex; flex-direction:column; gap:10px; }
+  .li {
+    background:var(--card-bg); border-radius:14px;
+    padding:12px 14px; box-shadow:0 2px 10px rgba(0,0,0,0.08);
+    display:flex; align-items:center; gap:12px;
+    animation:fadeUp .3s ease both;
+    border-left:4px solid #DDD; cursor:pointer;
+    transition:transform .15s,box-shadow .15s;
+  }
+  .li:hover { transform:translateX(2px); box-shadow:0 3px 14px rgba(0,0,0,0.12); }
+  .li.r1{border-left-color:#FFD700;}
+  .li.r2{border-left-color:#C0C0C0;}
+  .li.r3{border-left-color:#CD7F32;}
+  .lrk {
+    width:28px; height:28px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:900; flex-shrink:0;
+  }
+  .lrk.r1{background:#FFD700;color:#5D4A00;}
+  .lrk.r2{background:#E0E0E0;color:#666;}
+  .lrk.r3{background:#D4956A;color:white;}
+  .lrk.rn{background:#F0ECD8;color:#999;font-size:10px;}
+  .liw {
+    width:54px; height:54px; border-radius:12px;
+    background:linear-gradient(135deg,#FFF8DC,#FFF0B3); overflow:hidden; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .liw img { width:100%; height:100%; object-fit:contain; padding:4px; }
+  .lif { flex:1; min-width:0; }
+  .lin {
+    display:flex; align-items:center; gap:6px; margin-bottom:5px; flex-wrap:wrap;
+  }
+  .linm { font-size:15px; font-weight:900; color:var(--dark); }
+  .lino { font-size:10px; color:#AAA; font-weight:600; }
+  .lird { display:flex; align-items:center; gap:5px; margin-bottom:5px; flex-wrap:wrap; }
+  .lird .ab { margin-right:2px; }
+  .lira { font-size:10px; color:#999; margin-bottom:5px; }
+  .lbw { display:flex; align-items:center; gap:8px; }
+  .lbb { flex:1; height:5px; background:#EEE; border-radius:3px; overflow:hidden; }
+  .lbf { height:100%; border-radius:3px; transition:width .5s ease; }
+  .lpct { font-size:13px; font-weight:900; white-space:nowrap; min-width:38px; text-align:right; }
+  .lpr { flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+  .zc { padding:3px 8px; border-radius:8px; font-size:9px; font-weight:700; }
+  .zc.z0{background:#E8F5E9;color:#388E3C;}
+  .zc.z1{background:#E3F2FD;color:#1565C0;}
+  .zc.z2{background:#FFF3E0;color:#E65100;}
+  .zc.z3{background:#FCE4EC;color:#C62828;}
+  .zc.z4{background:#4A148C;color:white;}
+  .zmt { font-size:10px; color:#BBB; }
+
+  /* 空/无结果 */
+  .no-result { background:var(--card-bg); border-radius:13px; padding:22px; text-align:center; box-shadow:var(--shadow); }
+  .no-result .ni { font-size:38px; margin-bottom:8px; }
+  .no-result p { font-size:12px; color:#888; }
+
+  /* 匹配度图例 */
+  .ml { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:10px; }
+  .ml span { padding:3px 8px; border-radius:10px; font-size:10px; font-weight:600; }
+  .ml-exc { background:#E8F5E9; color:#2E7D32; }
+  .ml-good { background:#FFF8E1; color:#E65100; }
+  .ml-ok { background:#FFF3E0; color:#BF360C; }
+  .ml-weak { background:#FFEBEE; color:#C62828; }
+
+  /* ===== 详情弹窗 ===== */
+  .dm {
+    display:none; position:fixed; inset:0; z-index:999;
+    background:rgba(0,0,0,0.55); backdrop-filter:blur(4px);
+    align-items:center; justify-content:center;
+    padding:16px;
+  }
+  .dm.show { display:flex; }
+  .dmc {
+    background:#FFFDF5; border-radius:20px; width:100%; max-width:380px;
+    max-height:85vh; overflow-y:auto; box-shadow:0 16px 60px rgba(0,0,0,0.25);
+    animation:popIn .28s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+  .dmc-h {
+    position:relative; background:linear-gradient(135deg,#FFE082,#FFC107);
+    padding:22px 18px 18px; border-radius:20px 20px 0 0; overflow:hidden;
+  }
+  .dmc-h::before {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg,rgba(255,255,255,0.25) 0%,transparent 60%);
+  }
+  .dmc-x {
+    position:absolute; top:12px; right:12px;
+    width:28px; height:28px; border-radius:50%;
+    background:rgba(0,0,0,0.15); color:white;
+    border:none; cursor:pointer; font-size:14px;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:900; z-index:2;
+  }
+  .dmc-img {
+    width:88px; height:88px; margin:0 auto 10px;
+    background:rgba(255,255,255,0.6); border-radius:18px;
+    display:flex; align-items:center; justify-content:center;
+    position:relative; z-index:1; overflow:hidden;
+  }
+  .dmc-img img { width:100%; height:100%; object-fit:contain; padding:6px; }
+  .dmc-n { font-size:19px; font-weight:900; color:var(--dark); text-align:center; position:relative; z-index:1; }
+  .dmc-no { font-size:11px; color:rgba(61,43,0,0.6); text-align:center; margin-top:3px; position:relative; z-index:1; }
+  .dmc-as { display:flex; gap:5px; justify-content:center; margin-top:7px; position:relative; z-index:1; flex-wrap:wrap; }
+  .dmc-as .ab { font-size:9px; width:22px; height:22px; }
+  .dmc-b { padding:16px 18px; }
+  .dmc-s { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+  .dms { background:#FFF9E6; border-radius:12px; padding:11px 13px; }
+  .dms-l { font-size:10px; color:#999; margin-bottom:4px; }
+  .dms-v { font-size:17px; font-weight:900; color:var(--dark); }
+  .dms-r { font-size:10px; color:#AAA; margin-top:2px; }
+  .dmc-tag { display:inline-flex; align-items:center; gap:4px; background:#FFF3E0; color:#E65100; border-radius:8px; padding:4px 10px; font-size:11px; font-weight:700; }
+  .dmc-tag.mt8 { margin-top:8px; }
+  .dmc-tag.mt12 { margin-top:12px; }
+  .dmc-div { border-top:1px solid #F0E8D0; margin:14px 0; }
+
+  /* ===== 精灵搜索 ===== */
+  .sh-card { background:var(--card-bg); border-radius:14px; padding:14px 16px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .sh-label { font-size:11px; color:rgba(61,43,0,0.5); font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:5px; }
+  .sh-inp-wrap { display:flex; align-items:center; gap:8px; }
+  .sh-inp {
+    flex:1; background:#F8F4E8; border:2px solid #E8DFC0; border-radius:11px;
+    padding:9px 12px; font-size:14px; font-weight:700; color:var(--dark);
+    outline:none; transition:border-color .2s;
+  }
+  .sh-inp:focus { border-color:var(--yellow-dark); background:#FFFBE8; }
+  .sh-inp::placeholder { color:#BBB; font-weight:400; }
+  .sh-btn {
+    padding:9px 14px; background:var(--yellow-dark); color:white;
+    border:none; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer;
+  }
+  .sh-res { margin-top:10px; display:flex; flex-direction:column; gap:7px; }
+  .shr {
+    background:#FFF9E6; border-radius:10px; padding:9px 12px;
+    display:flex; align-items:center; gap:10px; cursor:pointer;
+    transition:background .15s;
+  }
+  .shr:hover { background:#FFF3C4; }
+  .shr-img { width:42px; height:42px; border-radius:8px; background:#FFF8DC; flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .shr-img img { width:100%; height:100%; object-fit:contain; padding:3px; }
+  .shr-img .sc-img-placeholder { font-size:16px; }
+  .shr-n { font-size:13px; font-weight:900; color:var(--dark); }
+  .shr-i { font-size:10px; color:#AAA; }
+  .shr-r { font-size:10px; color:#888; margin-top:2px; }
+
+  /* 版权 */
+  .footer { margin-top:22px; padding:14px; text-align:center; }
+  .credit-card { background:rgba(255,255,255,0.72); border-radius:12px; padding:13px 15px; font-size:10.5px; color:rgba(61,43,0,0.6); line-height:1.85; margin-bottom:8px; }
+  .credit-card a { color:var(--orange-accent); text-decoration:none; font-weight:600; }
+  .by-line { font-size:10px; color:rgba(61,43,0,0.4); }
+  .by-line strong { color:rgba(61,43,0,0.6); }
+  .tip-chip { display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.45); border-radius:18px; padding:4px 11px; font-size:11px; color:rgba(61,43,0,0.55); margin:7px auto 0; }
+
+</style>
+</head>
+<body>
+
+<span class="bg-deco" style="top:8%;left:-2%">?</span>
+<span class="bg-deco" style="top:38%;right:-3%">?</span>
+<span class="bg-deco" style="bottom:18%;left:4%">?</span>
+<span class="bg-deco" style="bottom:4%;right:4%">?</span>
+
+<!-- 顶栏 -->
+<div class="top-bar">
+  <h1>🥚 孵蛋结果预测器</h1>
+  <div class="subtitle">洛克王国：世界 · 精灵蛋识别工具 · 图鉴数据来源 BWIKI</div>
+</div>
+
+<div class="container">
+
+  <!-- 主标题 -->
+  <div class="hero">
+    <h2>孵蛋结果预测器</h2>
+    <div class="egg-wrap">
+      <svg class="egg-svg" id="eggSvg" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="eg" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity=".9"/>
+            <stop offset="60%" stop-color="#F0ECD8"/>
+            <stop offset="100%" stop-color="#D4C89A"/>
+          </radialGradient>
+          <radialGradient id="es" cx="30%" cy="25%" r="40%">
+            <stop offset="0%" stop-color="#FF9800" stop-opacity=".45"/>
+            <stop offset="40%" stop-color="#9C27B0" stop-opacity=".25"/>
+            <stop offset="70%" stop-color="#4CAF50" stop-opacity=".18"/>
+            <stop offset="100%" stop-color="#2196F3" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="50" cy="58" rx="36" ry="44" fill="url(#eg)"/>
+        <ellipse cx="50" cy="58" rx="36" ry="44" fill="url(#es)" opacity=".7"/>
+        <ellipse cx="50" cy="58" rx="36" ry="44" fill="none" stroke="rgba(200,180,100,0.28)" stroke-width="1.5"/>
+        <ellipse cx="38" cy="40" rx="8" ry="5.5" fill="rgba(255,255,255,0.55)" transform="rotate(-20,38,40)"/>
+        <text x="50" y="68" text-anchor="middle" font-size="28" font-weight="900" fill="rgba(150,120,40,0.5)" font-family="Arial,sans-serif">?</text>
+      </svg>
+    </div>
+    <div class="tip-chip">📐 输入精灵蛋尺寸与重量，一键预测孵化结果</div>
+  </div>
+
+  <!-- 输入卡片 -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>你的精灵蛋信息</div>
+    <div class="input-row">
+      <div class="input-group">
+        <label>精灵蛋尺寸（长度）</label>
+        <div class="input-wrap">
+          <span class="ico">📏</span>
+          <input type="number" id="sizeInput" placeholder="0.00" step="0.01" min="0" max="5">
+          <span class="unit">m</span>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>精灵蛋重量</label>
+        <div class="input-wrap">
+          <span class="ico">⚖️</span>
+          <input type="number" id="weightInput" placeholder="0.00" step="0.01" min="0" max="200">
+          <span class="unit">kg</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" id="predictBtn" onclick="predict()">🔍 反查精灵</button>
+    <label class="toggle-row">
+      <div class="toggle-wrap">
+        <input type="checkbox" id="rideOnlyToggle">
+        <div class="tslider"></div>
+      </div>
+      <span class="toggle-label">仅显示可骑乘精灵</span>
+    </label>
+    <div style="margin-top:14px">
+      <div class="sec-label">💡 快捷示例（点击填入）</div>
+      <div class="examples-row">
+        <span class="ex-chip" onclick="fillEx(0.22,1.35)">公平鸽</span>
+        <span class="ex-chip" onclick="fillEx(0.27,2.88)">电咩咩</span>
+        <span class="ex-chip" onclick="fillEx(0.55,30)">恶魔狼</span>
+        <span class="ex-chip" onclick="fillEx(0.32,4.6)">小狮鹫</span>
+        <span class="ex-chip" onclick="fillEx(0.12,0.5)">小鹬</span>
+        <span class="ex-chip" onclick="fillEx(0.25,1.5)">小黑猫</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 统计栏 -->
+  <div class="stats-card">
+    <div class="stat-item">
+      <div class="stat-label">精灵数据库</div>
+      <div class="stat-value" id="totalCount">—</div>
+      <div class="stat-sub">条记录</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">预测模型</div>
+      <div class="stat-value sm">距离衰减</div>
+      <div class="stat-sub">无绝对匹配</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">数据版本</div>
+      <div class="stat-value sm">2026.05</div>
+      <div class="stat-sub">BWIKI</div>
+    </div>
+  </div>
+
+  <!-- 结果区 -->
+  <div id="resultsSection">
+    <div class="empty-state">
+      <div class="ei">🥚</div>
+      <p>输入精灵蛋的<strong>尺寸</strong>和<strong>重量</strong><br>点击「反查精灵」开始预测</p>
+    </div>
+  </div>
+
+  <!-- 版权 -->
+  <div class="footer">
+    <div class="credit-card">
+      📖 部分数据与规则参考 <a href="https://wiki.biligame.com/rocom/" target="_blank">洛克王国 BWIKI</a> 社区整理内容，精灵图片版权归原游戏所有。<br>
+      转载请先取得 BWIKI 授权，并注明来源。<br>
+      本WIKI遵循 <strong>CC BY-SA 4.0</strong>（署名-非商业-相同方式共享）协议。<br>
+      欢迎使用，请署名 · <em>原资料来源于洛克王国BWIKI</em> 🙏
+    </div>
+    <div class="by-line">Made for 训练家们 · 图鉴数据：<strong>洛克王国BWIKI</strong></div>
+  </div>
+</div>
+
+<!-- 精灵搜索卡片 -->
+<div class="sh-card">
+  <div class="sh-label">🔎 精灵搜索</div>
+  <div class="sh-inp-wrap">
+    <input class="sh-inp" id="shInp" placeholder="输入精灵名称或编号…" oninput="shOnInput(this.value)" onkeydown="if(event.key==='Enter')shSearch()">
+    <button class="sh-btn" onclick="shSearch()">搜索</button>
+  </div>
+  <div id="shResults"></div>
+</div>
+
+<!-- 算法说明弹窗 -->
+<div id="algoModal" style="display:none" class="mo" onclick="closeAlgo(event)">
+  <div class="mx" onclick="event.stopPropagation()">
+    <h3>📊 预测算法说明</h3>
+    <p>本工具使用<strong>连续距离衰减模型</strong>，<strong>不存在100%绝对匹配</strong>，更符合实际预测场景。</p>
+    <ul style="margin-top:8px;padding-left:18px;">
+      <li><strong>尺寸/重量匹配</strong>：区间内越接近中心分越高（最高约92），偏离则下降；区间外继续衰减，最多延伸50%范围归零。</li>
+      <li><strong>综合评分</strong>：重量65% ＋ 尺寸35%，重量对孵蛋结果影响更大。</li>
+      <li><strong>结果分级</strong>：≥80 优秀 · 60–79 良好 · 40–59 一般 · &lt;40 较弱。</li>
+    </ul>
+    <p style="margin-top:8px;font-size:12px;color:#555;">🖼️ <strong>图片说明</strong>：精灵图片来自 BWIKI。部署后建议通过 <strong>Cloudflare Workers</strong> 代理跨域图片，或在代码 <code>IMG_EMBED</code> 中补充图片 base64/URL 数据。</p>
+    <button class="mc" onclick="document.getElementById('algoModal').style.display='none'">知道了</button>
+  </div>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="dm" id="detailModal">
+  <div class="dmc">
+    <div class="dmc-h">
+      <button class="dmc-x" onclick="closeDetail()">✕</button>
+      <div class="dmc-img" id="dmImg"></div>
+      <div class="dmc-n" id="dmName"></div>
+      <div class="dmc-no" id="dmNo"></div>
+      <div class="dmc-as" id="dmAttrs"></div>
+    </div>
+    <div class="dmc-b">
+      <div class="dmc-s">
+        <div class="dms">
+          <div class="dms-l">📐 尺寸范围</div>
+          <div class="dms-v" id="dmSize"></div>
+          <div class="dms-r" id="dmSizeTip"></div>
+        </div>
+        <div class="dms">
+          <div class="dms-l">⚖️ 重量范围</div>
+          <div class="dms-v" id="dmWeight"></div>
+          <div class="dms-r" id="dmWeightTip"></div>
+        </div>
+      </div>
+      <div id="dmTags"></div>
+      <div class="dmc-div"></div>
+      <div style="font-size:11px;color:#888;line-height:1.8;">
+        💡 <strong>如何用此工具？</strong><br>
+        在「反查精灵」中输入精灵蛋的尺寸和重量，即可快速匹配对应精灵。
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 精灵数据库
+// 数据参考：游侠网 & 洛克王国BWIKI社区整理（CC BY-SA 4.0）
+// 图片来源：BWIKI（patchwiki.biligame.com）
+// ============================================================
+
+// ============================================================
+// 精灵数据（含编号、属性、蛋区）
+// 数据参考：洛克王国BWIKI & 游侠网（CC BY-SA 4.0）
+// ============================================================
+const SPIRITS = [
+  // 超轻蛋（< 1kg）
+  { id:'054', name:'小灵面',  attr:['幽'],       sMin:0.15, sMax:0.22, wMin:0.034,wMax:0.056, zone:0 },
+  { id:'069', name:'蒲公英',  attr:['草'],       sMin:0.12, sMax:0.19, wMin:0.045,wMax:0.090, zone:0 },
+  { id:'118', name:'旋叶虫',  attr:['草'],       sMin:0.04, sMax:0.07, wMin:0.051,wMax:0.100, zone:0 },
+  { id:'198', name:'逗逗',    attr:['萌'],       sMin:0.11, sMax:0.17, wMin:0.24, wMax:0.31,  zone:0 },
+  { id:'174', name:'菇菇丁',  attr:['草'],       sMin:0.10, sMax:0.17, wMin:0.34, wMax:0.54,  zone:0 },
+  { id:'239', name:'豆丁鱼',  attr:['水'],       sMin:0.11, sMax:0.20, wMin:0.39, wMax:0.67,  zone:0 },
+  { id:'231', name:'小鹬',    attr:['翼'],       sMin:0.09, sMax:0.15, wMin:0.44, wMax:0.79,  zone:0 },
+  { id:'277', name:'地鼠',    attr:['地'],       sMin:0.18, sMax:0.29, wMin:0.57, wMax:1.00,  zone:0 },
+  { id:'128', name:'哭哭菇',  attr:['草'],       sMin:0.13, sMax:0.22, wMin:0.64, wMax:1.39,  zone:0 },
+  { id:'099', name:'小草虫',  attr:['草'],       sMin:0.18, sMax:0.29, wMin:0.67, wMax:1.29,  zone:0 },
+  { id:'207', name:'闪电环',  attr:['电'],       sMin:0.14, sMax:0.22, wMin:0.80, wMax:1.35,  zone:0 },
+  { id:'261', name:'螺旋帕帕',attr:['机械'],     sMin:0.14, sMax:0.20, wMin:0.75, wMax:1.49,  zone:0 },
+
+  // 轻蛋（1~1.8kg）
+  { id:'162', name:'公平鸽',  attr:['翼'],       sMin:0.18, sMax:0.26, wMin:0.89, wMax:1.45,  zone:1 },
+  { id:'201', name:'花怨鳗',  attr:['水'],       sMin:0.22, sMax:0.30, wMin:0.91, wMax:1.56,  zone:1 },
+  { id:'237', name:'刺轮砣',  attr:['机械'],     sMin:0.08, sMax:0.15, wMin:0.95, wMax:1.68,  zone:1 },
+  { id:'071', name:'伊贝儿',  attr:['萌'],       sMin:0.17, sMax:0.29, wMin:1.07, wMax:1.87,  zone:1 },
+  { id:'032', name:'毛毛',    attr:['虫'],       sMin:0.13, sMax:0.21, wMin:1.11, wMax:2.01,  zone:1 },
+  { id:'220', name:'海枝枝',  attr:['水'],       sMin:0.29, sMax:0.40, wMin:1.12, wMax:2.82,  zone:1 },
+  { id:'030', name:'恶魔叮',  attr:['恶'],       sMin:0.15, sMax:0.24, wMin:1.13, wMax:1.68,  zone:1 },
+  { id:'102', name:'绿翼鸟',  attr:['草','翼'],  sMin:0.19, sMax:0.25, wMin:1.14, wMax:1.66,  zone:1 },
+  { id:'270', name:'优优',    attr:['萌'],       sMin:0.16, sMax:0.24, wMin:1.15, wMax:1.67,  zone:1 },
+  { id:'132', name:'小电企鹅',attr:['电'],       sMin:0.17, sMax:0.26, wMin:1.17, wMax:2.25,  zone:1 },
+  { id:'183', name:'号儿鱼',  attr:['水'],       sMin:0.12, sMax:0.19, wMin:1.26, wMax:2.28,  zone:1 },
+  { id:'274', name:'格兰种子',attr:['草'],       sMin:0.17, sMax:0.25, wMin:1.34, wMax:2.15,  zone:1 },
+  { id:'121', name:'小黑猫',  attr:['幽'],       sMin:0.22, sMax:0.30, wMin:1.35, wMax:2.01,  zone:1 },
+  { id:'313', name:'果冻',    attr:['水'],       sMin:0.12, sMax:0.17, wMin:1.39, wMax:2.52,  zone:1 },
+  { id:'082', name:'一窝蜂',  attr:['虫'],       sMin:0.15, sMax:0.25, wMin:1.40, wMax:2.44,  zone:1 },
+  { id:'085', name:'小夜',    attr:['幽'],       sMin:0.21, sMax:0.33, wMin:1.46, wMax:3.08,  zone:1 },
+  { id:'041', name:'奇丽草',  attr:['草'],       sMin:0.16, sMax:0.24, wMin:1.49, wMax:2.32,  zone:1 },
+  { id:'088', name:'乖乖鹄',  attr:['水'],       sMin:0.20, sMax:0.30, wMin:1.49, wMax:2.38,  zone:1 },
+  { id:'266', name:'可立鸡',  attr:['武'],       sMin:0.15, sMax:0.25, wMin:1.49, wMax:3.02,  zone:1 },
+  { id:'063', name:'蹦蹦种子',attr:['草'],       sMin:0.20, sMax:0.30, wMin:1.52, wMax:2.39,  zone:1 },
+  { id:'177', name:'斑斑',    attr:['翼'],       sMin:0.18, sMax:0.28, wMin:1.52, wMax:2.78,  zone:1 },
+  { id:'079', name:'菊花梨',  attr:['草'],       sMin:0.27, sMax:0.34, wMin:1.56, wMax:1.95,  zone:1 },
+  { id:'193', name:'奔波鼠',  attr:['地'],       sMin:0.20, sMax:0.34, wMin:1.59, wMax:2.71,  zone:1 },
+  { id:'258', name:'乌达',    attr:['恶'],       sMin:0.18, sMax:0.26, wMin:1.59, wMax:2.57,  zone:1 },
+  { id:'049', name:'绿耳松鼠',attr:['草'],       sMin:0.22, sMax:0.32, wMin:1.61, wMax:2.59,  zone:1 },
+
+  // 中等蛋（1.8~4kg）
+  { id:'059', name:'兽花蕾',  attr:['草'],       sMin:0.15, sMax:0.19, wMin:1.62, wMax:2.25,  zone:2 },
+  { id:'044', name:'丢丢',    attr:['草'],       sMin:0.15, sMax:0.24, wMin:1.66, wMax:2.72,  zone:2 },
+  { id:'171', name:'波波螺',  attr:['水'],       sMin:0.14, sMax:0.18, wMin:1.70, wMax:2.38,  zone:2 },
+  { id:'179', name:'草头鸭',  attr:['水'],       sMin:0.21, sMax:0.30, wMin:1.74, wMax:2.66,  zone:2 },
+  { id:'195', name:'呆小路',  attr:['草'],       sMin:0.27, sMax:0.36, wMin:1.78, wMax:2.39,  zone:2 },
+  { id:'210', name:'小箱怪',  attr:['幽'],       sMin:0.14, sMax:0.20, wMin:1.78, wMax:2.83,  zone:2 },
+  { id:'039', name:'矿晶石',  attr:['虫'],       sMin:0.25, sMax:0.32, wMin:2.06, wMax:2.58,  zone:2 },
+  { id:'221', name:'多西',    attr:['机械'],     sMin:0.30, sMax:0.39, wMin:2.18, wMax:2.73,  zone:2 },
+  { id:'137', name:'呼呼猪',  attr:['冰'],       sMin:0.20, sMax:0.35, wMin:2.19, wMax:3.97,  zone:2 },
+  { id:'139', name:'雪娃娃',  attr:['冰'],       sMin:0.11, sMax:0.19, wMin:2.21, wMax:3.52,  zone:2 },
+  { id:'036', name:'小鼠獭',  attr:['水'],       sMin:0.15, sMax:0.23, wMin:2.24, wMax:3.12,  zone:2 },
+  { id:'212', name:'古钟蛇',  attr:['幽'],       sMin:0.40, sMax:0.52, wMin:2.27, wMax:3.52,  zone:2 },
+  { id:'283', name:'小甲虫',  attr:['虫'],       sMin:0.20, sMax:0.26, wMin:2.35, wMax:2.98,  zone:2 },
+  { id:'076', name:'海盗虫',  attr:['水'],       sMin:0.21, sMax:0.33, wMin:2.36, wMax:3.83,  zone:2, note:'海盔虫' },
+  { id:'012', name:'板板壳',  attr:['水'],       sMin:0.21, sMax:0.35, wMin:2.37, wMax:4.50,  zone:2 },
+  { id:'147', name:'灵狐',    attr:['火'],       sMin:0.22, sMax:0.35, wMin:2.41, wMax:3.78,  zone:2 },
+  { id:'066', name:'电咩咩',  attr:['电'],       sMin:0.24, sMax:0.32, wMin:2.52, wMax:3.34,  zone:2 },
+  { id:'205', name:'拉特',    attr:['电'],       sMin:0.20, sMax:0.28, wMin:2.64, wMax:3.80,  zone:2 },
+  { id:'185', name:'甜田螺',  attr:['水'],       sMin:0.18, sMax:0.23, wMin:2.81, wMax:3.56,  zone:2 },
+  { id:'287', name:'吸泥鸥',  attr:['翼'],       sMin:0.21, sMax:0.33, wMin:3.20, wMax:5.54,  zone:2 },
+  { id:'134', name:'雪豆丁',  attr:['冰'],       sMin:0.35, sMax:0.51, wMin:3.27, wMax:4.86,  zone:2 },
+  { id:'263', name:'机械方方',attr:['机械'],     sMin:0.20, sMax:0.25, wMin:3.30, wMax:4.14,  zone:2 },
+
+  // 重蛋（4~14kg）
+  { id:'165', name:'小狮鹫',  attr:['翼'],       sMin:0.28, sMax:0.37, wMin:3.87, wMax:5.54,  zone:3, rideable:true },
+  { id:'255', name:'治愈兔',  attr:['萌'],       sMin:0.23, sMax:0.38, wMin:3.90, wMax:6.44,  zone:3 },
+  { id:'188', name:'棋棋',    attr:['萌'],       sMin:0.15, sMax:0.21, wMin:3.96, wMax:5.97,  zone:3 },
+  { id:'047', name:'护主犬',  attr:['火'],       sMin:0.24, sMax:0.42, wMin:4.37, wMax:7.61,  zone:3, rideable:true },
+  { id:'015', name:'锥尾羊',  attr:['地'],       sMin:0.23, sMax:0.35, wMin:4.43, wMax:6.82,  zone:3 },
+  { id:'011', name:'鸭吉吉',  attr:['翼'],       sMin:0.27, sMax:0.44, wMin:5.03, wMax:7.83,  zone:3 },
+  { id:'125', name:'多多',    attr:['龙'],       sMin:0.19, sMax:0.28, wMin:5.04, wMax:7.71,  zone:3 },
+  { id:'108', name:'风铃鲨',  attr:['水'],       sMin:0.18, sMax:0.27, wMin:5.07, wMax:7.27,  zone:3 },
+  { id:'242', name:'胆小鳗鱼',attr:['电'],       sMin:0.30, sMax:0.44, wMin:6.08, wMax:10.08, zone:3 },
+  { id:'163', name:'小怂猫',  attr:['普通'],     sMin:0.23, sMax:0.40, wMin:6.17, wMax:10.07, zone:3 },
+  { id:'073', name:'白发懒人',attr:['普通'],     sMin:0.28, sMax:0.49, wMin:6.33, wMax:10.50, zone:3, rideable:true },
+  { id:'027', name:'布是石',  attr:['地'],       sMin:0.16, sMax:0.28, wMin:6.39, wMax:14.10, zone:3 },
+  { id:'216', name:'火尾瓦特',attr:['火'],       sMin:0.28, sMax:0.43, wMin:6.43, wMax:9.40,  zone:3 },
+  { id:'024', name:'石肤蜥',  attr:['地'],       sMin:0.19, sMax:0.33, wMin:6.90, wMax:15.11, zone:3 },
+  { id:'289', name:'大头骨龙',attr:['龙'],       sMin:0.33, sMax:0.45, wMin:7.47, wMax:12.87, zone:3, rideable:true },
+  { id:'203', name:'伊雷龙',  attr:['龙'],       sMin:0.28, sMax:0.41, wMin:8.63, wMax:13.83, zone:3, rideable:true },
+  { id:'080', name:'小星光',  attr:['光'],       sMin:0.30, sMax:0.47, wMin:8.66, wMax:14.58, zone:3 },
+  { id:'145', name:'权杖-Ⅱ', attr:['机械'],     sMin:0.17, sMax:0.26, wMin:8.99, wMax:15.68, zone:3 },
+  { id:'035', name:'幽影树',  attr:['幽'],       sMin:0.25, sMax:0.41, wMin:9.66, wMax:15.83, zone:3 },
+  { id:'244', name:'水母',    attr:['水'],       sMin:0.19, sMax:0.32, wMin:10.08,wMax:16.07, zone:3, note:'翡翠水母' },
+  { id:'226', name:'电动长颈鹿',attr:['电'],     sMin:0.30, sMax:0.47, wMin:10.42,wMax:16.76, zone:3, rideable:true },
+
+  // 超重蛋（>14kg）
+  { id:'229', name:'提塔',    attr:['机械'],     sMin:0.25, sMax:0.35, wMin:12.69,wMax:19.21, zone:4, note:'缇塔' },
+  { id:'116', name:'小独角兽',attr:['翼'],       sMin:0.38, sMax:0.65, wMin:13.10,wMax:24.63, zone:4, rideable:true },
+  { id:'219', name:'里拉鳐',  attr:['水'],       sMin:0.37, sMax:0.52, wMin:13.19,wMax:21.66, zone:4, rideable:true },
+  { id:'105', name:'阿米亚特',attr:['地'],       sMin:0.25, sMax:0.52, wMin:14.60,wMax:21.59, zone:4 },
+  { id:'052', name:'嘟嘟煲',  attr:['火'],       sMin:0.25, sMax:0.37, wMin:15.71,wMax:25.16, zone:4 },
+  { id:'092', name:'锤头鹳',  attr:['水'],       sMin:0.42, sMax:0.71, wMin:16.72,wMax:28.61, zone:4, rideable:true },
+  { id:'111', name:'石石',    attr:['地'],       sMin:0.15, sMax:0.23, wMin:22.08,wMax:31.13, zone:4 },
+  { id:'181', name:'海豹战士',attr:['水'],       sMin:0.25, sMax:0.43, wMin:23.10,wMax:38.89, zone:4, rideable:true },
+  { id:'131', name:'恶魔狼',  attr:['恶'],       sMin:0.47, sMax:0.81, wMin:23.40,wMax:40.60, zone:4, rideable:true },
+  { id:'095', name:'记忆石',  attr:['地'],       sMin:0.39, sMax:0.65, wMin:30.36,wMax:50.01, zone:4 },
+];
+
+const ZONE_NAMES = ['超轻','轻','中等','重','超重'];
+const ZONE_CLASSES = ['z0','z1','z2','z3','z4'];
+
+document.getElementById('totalCount').textContent = SPIRITS.length;
+
+let currentView = 'card';
+
+// ============================================================
+// 核心算法：连续距离衰减（无100%绝对匹配，最高约92分）
+// ============================================================
+function dimScore(val, min, max) {
+  const range = max - min;
+  if (range <= 0) return val === min ? 88 : 0;
+  const center = (min + max) / 2;
+  const half = range / 2;
+  const dist = Math.abs(val - center);
+  if (dist <= half) {
+    // 区间内：中心92分，边界50分，线性衰减
+    return 92 - (dist / half) * (92 - 50);
+  } else {
+    // 区间外：从50分继续衰减，延伸 range*0.5 后归零
+    const over = dist - half;
+    const maxOver = range * 0.5;
+    if (over >= maxOver) return 0;
+    return 50 * (1 - over / maxOver);
+  }
+}
+
+function calcScore(s, size, weight) {
+  const ws = dimScore(size, s.sMin, s.sMax);
+  const ww = dimScore(weight, s.wMin, s.wMax);
+  return ws * 0.35 + ww * 0.65;
+}
+
+function pct(s) { return Math.min(92, Math.max(0, Math.round(s))); }
+function barClass(s) { return s>=80?'bf-e':s>=60?'bf-g':s>=40?'bf-o':'bf-w'; }
+function matchLabel(s) { return s>=80?'优秀':s>=60?'良好':s>=40?'一般':'较弱'; }
+
+// ============================================================
+// 图片处理：通过 BWIKI MediaWiki API 动态查询真实图片 URL
+// API: wiki.biligame.com/rocom/api.php?action=query&prop=imageinfo
+// 图片真实路径含哈希，不能直接拼 URL，必须 API 查询
+// ============================================================
+const _imgCache = {}; // { name: url | 'none' }
+
+function getSpiritImgHTML(spirit) {
+  const name = spirit.name;
+  const id = 'si-' + name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_');
+  // 返回占位符，异步加载真实图片
+  setTimeout(() => _loadSpiritImg(name, id), 0);
+  return `<div id="${id}" class="sc-img-placeholder" title="${name}">⋯</div>`;
+}
+
+function _loadSpiritImg(name, id) {
+  if (_imgCache[name]) {
+    _applyImg(id, name, _imgCache[name]);
+    return;
+  }
+  const title = encodeURIComponent('File:页面_宠物_立绘_' + name + '_1.png');
+  const api = `https://wiki.biligame.com/rocom/api.php?action=query&titles=${title}&prop=imageinfo&iiprop=url&format=json&origin=*`;
+  fetch(api)
+    .then(r => r.json())
+    .then(data => {
+      const pages = data.query && data.query.pages;
+      if (!pages) { _imgCache[name] = 'none'; return; }
+      const page = Object.values(pages)[0];
+      const url = page.imageinfo && page.imageinfo[0] && page.imageinfo[0].url;
+      _imgCache[name] = url || 'none';
+      _applyImg(id, name, _imgCache[name]);
+    })
+    .catch(() => {
+      _imgCache[name] = 'none';
+      _applyImg(id, name, 'none');
+    });
+}
+
+function _applyImg(id, name, url) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (url && url !== 'none') {
+    el.outerHTML = `<img src="${url}" alt="${name}" loading="lazy" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:6px;" onerror="this.outerHTML='<div class=\\'sc-img-placeholder\\' title=\\'${name}\\'>🐾</div>'">`;
+  } else {
+    el.title = name;
+    el.textContent = '🐾';
+  }
+}
+
+function fillEx(size, weight) {
+  document.getElementById('sizeInput').value = size;
+  document.getElementById('weightInput').value = weight;
+  predict();
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('btnCard').classList.toggle('active', v === 'card');
+  document.getElementById('btnList').classList.toggle('active', v === 'list');
+  if (lastResults.length) renderResults(lastResults);
+}
+
+function showAlgo() {
+  document.getElementById('algoModal').style.display = 'flex';
+}
+function closeAlgo(e) {
+  if (e.target.classList.contains('mo')) document.getElementById('algoModal').style.display = 'none';
+}
+
+function onRideToggle() {
+  if (lastResults.length) predict();
+}
+
+// ===== 详情弹窗 =====
+function openDetail(name) {
+  const s = SPIRITS.find(x => x.name === name);
+  if (!s) return;
+  const sc = lastResults.find(r => r.name === name);
+  const score = sc ? pct(sc.score) : null;
+  const scoreTip = score ? `匹配度参考：${score}%（${matchLabel(score)}）` : '输入蛋数据后可计算匹配度';
+
+  document.getElementById('dmImg').innerHTML = getSpiritImgHTML(s);
+  document.getElementById('dmName').textContent = s.name;
+  document.getElementById('dmNo').textContent = 'NO.' + s.id;
+  document.getElementById('dmAttrs').innerHTML = attrAb(s.attr);
+  document.getElementById('dmSize').textContent = s.sMin + ' ~ ' + s.sMax + ' m';
+  document.getElementById('dmSizeTip').textContent = '精灵蛋尺寸范围';
+  document.getElementById('dmWeight').textContent = s.wMin + ' ~ ' + s.wMax + ' kg';
+  document.getElementById('dmWeightTip').textContent = '精灵蛋重量范围';
+
+  let tags = '';
+  if (s.rideable) tags += `<span class="dmc-tag">🐴 可骑乘</span>`;
+  if (s.note) tags += `<span class="dmc-tag mt8">📝 别名：${s.note}</span>`;
+  if (score !== null) tags += `<span class="dmc-tag mt8" style="background:#FFF3E0;color:#E65100">📊 匹配度：${score}%（${matchLabel(score)}）</span>`;
+  document.getElementById('dmTags').innerHTML = tags;
+
+  document.getElementById('detailModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('detailModal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// 点击遮罩关闭
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+// ===== 精灵搜索 =====
+let shTimer = null;
+function shOnInput(val) {
+  clearTimeout(shTimer);
+  if (!val.trim()) {
+    document.getElementById('shResults').innerHTML = '';
+    return;
+  }
+  shTimer = setTimeout(() => shSearch(val), 250);
+}
+
+function shSearch() {
+  const val = document.getElementById('shInp').value.trim().toLowerCase();
+  if (!val) return;
+  const hits = SPIRITS.filter(s =>
+    s.name.toLowerCase().includes(val) ||
+    s.id.toLowerCase().includes(val)
+  ).slice(0, 6);
+
+  if (!hits.length) {
+    document.getElementById('shResults').innerHTML = `<div style="text-align:center;padding:10px;font-size:12px;color:#AAA">未找到「${val}」</div>`;
+    return;
+  }
+
+  let html = `<div class="sh-res">`;
+  hits.forEach(s => {
+    html += `<div class="shr" onclick="shSelect('${s.name}')">
+      <div class="shr-img">${getSpiritImgHTML(s)}</div>
+      <div>
+        <div class="shr-n">${s.name}</div>
+        <div class="shr-i">NO.${s.id} · ${attrAbSm(s.attr)}</div>
+        <div class="shr-r">📐 ${s.sMin}–${s.sMax}m · ⚖️ ${s.wMin}–${s.wMax}kg</div>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+  document.getElementById('shResults').innerHTML = html;
+}
+
+function shSelect(name) {
+  document.getElementById('shInp').value = name;
+  document.getElementById('shResults').innerHTML = '';
+  openDetail(name);
+}
+
+let lastResults = [];
+
+function predict() {
+  const size = parseFloat(document.getElementById('sizeInput').value);
+  const weight = parseFloat(document.getElementById('weightInput').value);
+  const rideOnly = document.getElementById('rideOnlyToggle').checked;
+  const section = document.getElementById('resultsSection');
+  const btn = document.getElementById('predictBtn');
+  const egg = document.getElementById('eggSvg');
+
+  if (isNaN(size) || isNaN(weight) || size <= 0 || weight <= 0) {
+    section.innerHTML = `<div class="no-result"><div class="ni">⚠️</div><p>请输入有效的尺寸和重量数值</p></div>`;
+    return;
+  }
+
+  egg.classList.add('busy');
+  btn.textContent = '🔍 预测中...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    egg.classList.remove('busy');
+    btn.textContent = '🔍 反查精灵';
+    btn.disabled = false;
+
+    let pool = rideOnly ? SPIRITS.filter(s => s.rideable) : SPIRITS;
+    const scored = pool.map(s => ({ ...s, score: calcScore(s, size, weight) }))
+      .sort((a, b) => b.score - a.score)
+      .filter(s => s.score > 0)
+      .slice(0, 12);
+
+    if (!scored.length) {
+      section.innerHTML = `<div class="no-result"><div class="ni">🤔</div><p>未找到匹配的精灵<br>请检查数值范围<br><small style="color:#bbb">尺寸：0.04m–0.81m · 重量：0.03kg–50kg</small></p></div>`;
+      return;
+    }
+
+    lastResults = scored;
+    renderResults(scored);
+  }, 550);
+}
+
+function attrAb(s) {
+  return s.map(a => `<span class="ab ab-${a}">${a}</span>`).join('');
+}
+function attrAbSm(s) {
+  return s.map(a => `<span class="ab ab-sm ab-${a}">${a}</span>`).join('');
+}
+function rk(i) {
+  const c = i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+  return `<div class="srb ${c}">${i+1}</div>`;
+}
+function lRk(i) {
+  const c = i===0?'r1':i===1?'r2':i===2?'r3':'rn';
+  return `<div class="lrk ${c}">${i+1}</div>`;
+}
+function pc(s) { return pct(s.score); }
+function pcClr(s) { return s>=80?'#2E7D32':s>=60?'#E65100':s>=40?'#C62828':'#880000'; }
+function zC(z) { return 'zc z'+z; }
+function zN(z) { return ['超轻蛋','轻蛋','中等蛋','重蛋','超重蛋'][z]||''; }
+
+function renderResults(results) {
+  const section = document.getElementById('resultsSection');
+  let html = `
+    <div class="view-toggle-row">
+      <div class="results-header">🎯 预测结果 <span class="badge">${results.length} 个</span></div>
+      <div class="view-btns">
+        <button class="vbtn ${currentView==='card'?'active':''}" id="btnCard" onclick="setView('card')">卡片</button>
+        <button class="vbtn ${currentView==='list'?'active':''}" id="btnList" onclick="setView('list')">列表</button>
+      </div>
+    </div>
+    <div class="ml">
+      <span class="ml-exc">🏆 ≥80 优秀</span>
+      <span class="ml-good">👍 60-79 良好</span>
+      <span class="ml-ok">🤔 40-59 一般</span>
+      <span class="ml-weak">😟 &lt;40 较弱</span>
+    </div>`;
+
+  if (currentView === 'card') {
+    html += `<div class="cg">`;
+    results.forEach((s, i) => {
+      const sc = pc(s);
+      html += `<div class="scrd" style="animation-delay:${i*0.05}s" onclick="openDetail('${s.name}')">
+        <div class="siw">
+          ${getSpiritImgHTML(s)}
+          <span class="sp">${sc}%</span>
+          <span class="sn">NO.${s.id}</span>
+          ${rk(i)}
+          ${s.rideable?'<span class="sb">🐴</span>':''}
+        </div>
+        <div class="sbo">
+          <div class="snm">${s.name}</div>
+          <div class="sat">${attrAb(s.attr)}</div>
+          <div class="sbw"><div class="sbf ${barClass(sc)}" style="width:${sc}%"></div></div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div class="lv">`;
+    results.forEach((s, i) => {
+      const sc = pc(s);
+      html += `<div class="li ${i===0?'r1':i===1?'r2':i===2?'r3':''}" style="animation-delay:${i*0.05}s" onclick="openDetail('${s.name}')">
+        ${lRk(i)}
+        <div class="liw">${getSpiritImgHTML(s)}</div>
+        <div class="lif">
+          <div class="lin">
+            <span class="linm">${s.name}</span>
+            <span class="lino">NO.${s.id}</span>
+            ${attrAbSm(s.attr)}
+            ${s.rideable?'<span style="font-size:12px">🐴</span>':''}
+          </div>
+          <div class="lira">📐 ${s.sMin}–${s.sMax}m &nbsp; ⚖️ ${s.wMin}–${s.wMax}kg</div>
+          <div class="lbw">
+            <div class="lbb"><div class="lbf ${barClass(sc)}" style="width:${sc}%"></div></div>
+            <span class="lpct" style="color:${pcClr(sc)}">${sc}%</span>
+          </div>
+        </div>
+        <div class="lpr">
+          <span class="${zC(s.zone)}">${zN(s.zone)}</span>
+          <span class="zmt">${matchLabel(sc)}</span>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div style="text-align:center;margin-top:11px;font-size:10px;color:rgba(61,43,0,0.38)">🥚 点击卡片/列表项可查看精灵详情 · 推测模型持续优化中</div>`;
+  section.innerHTML = html;
+}
+
+// 波纹效果
+document.getElementById('predictBtn').addEventListener('click', function(e) {
+  const r = document.createElement('span');
+  const rect = this.getBoundingClientRect();
+  const sz = Math.max(rect.width, rect.height);
+  r.className = 'btn-ripple';
+  r.style.cssText = `width:${sz}px;height:${sz}px;left:${e.clientX-rect.left-sz/2}px;top:${e.clientY-rect.top-sz/2}px`;
+  this.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+});
+
+// 回车触发
+['sizeInput','weightInput'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') predict(); });
+});
+</script>
+</body>
+</html>
